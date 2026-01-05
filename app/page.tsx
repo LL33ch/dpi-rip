@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useChecker } from '@/hooks/useChecker';
 import { UserInfo } from '@/components/UserInfo';
 import { DPIChecker } from '@/components/DPIChecker';
@@ -29,14 +29,14 @@ export default function Home() {
             data-show-count='true'
             aria-label='Star LL33ch/dpi-checker on GitHub'
           >
-            Star
+            Github
           </GitHubButton>
         </div>
 
         <UserInfo userInfo={userInfo} />
 
         <div>
-          <Button onClick={runAllChecks} disabled={isChecking} size='lg' className='w-full'>
+          <Button onClick={runAllChecks} size='lg' className='w-full'>
             {isChecking ? (
               <>
                 <Loader2 className='h-5 w-5 animate-spin' />
