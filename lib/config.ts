@@ -6,7 +6,7 @@ export const DPI_TESTS: DPITest[] = [
     name: 'Cloudflare #1',
     provider: 'Cloudflare',
     country: 'US',
-    url: 'https://cdn.cookielaw.org/scripttemplates/202501.2.0/otBannerSdk.js',
+    url: 'https://img.wzstats.gg/cleaver/gunFullDisplay',
     expectedSize: 64 * 1024,
   },
   {
