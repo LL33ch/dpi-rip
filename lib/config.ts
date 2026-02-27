@@ -256,7 +256,7 @@ export const SERVICES: Service[] = [
     endpoints: [
       {
         url: 'https://abs.twimg.com/favicons/twitter.3.ico',
-        minSize: 1000,
+        minSize: 500,
       },
       {
         url: 'https://abs.twimg.com/responsive-web/client-web/icon-ios.77d25eba.png',
