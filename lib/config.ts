@@ -329,5 +329,15 @@ export const SERVICES: Service[] = [
     ],
   },
 ];
-
+ id: 'flibusta',
+    name: 'flibusta.is',
+    logo: '/flibusta.png',
+    endpoints: [
+      {
+        url: 'https://flibusta.is/sites/default/files/bluebreeze_logo.png',
+        minSize: 1000,
+       },
+    ],
+  },
+];
 export const TIMEOUT_MS = 10000;
