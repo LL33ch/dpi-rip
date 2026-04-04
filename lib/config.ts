@@ -329,5 +329,15 @@ export const SERVICES: Service[] = [
     ],
   },
 ];
-
+id: 'rutor',
+    name: 'rutor.info',
+    logo: 'logos:rutor',
+    endpoints: [
+      {
+        url: 'https://cdnbunny.org/favicon.ico',
+        minSize: 1000,
+      },
+    ],
+  },
+  {
 export const TIMEOUT_MS = 10000;
