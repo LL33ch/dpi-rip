@@ -9,8 +9,8 @@ const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 const inter = Inter({ subsets: ['latin', 'cyrillic'] });
 
 export const metadata: Metadata = {
-  title: 'DPI-CHECKER | Blocking Check | DPI & Service Checker',
-  description: 'DPI blocking detection (TCP 16-20) and service availability check',
+  title: 'DPI-CHECKER | Internet Censorship & Blocking Detector',
+  description: 'Crowdsourced detection of internet censorship and DPI blocking.',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

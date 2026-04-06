@@ -1,125 +1,74 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { DPIResult, ServiceResult, UserInfo } from '@/lib/types';
-import { DPI_TESTS, SERVICES } from '@/lib/config';
-import { checkDPI } from '@/lib/checkers/dpi';
-import { checkService } from '@/lib/checkers/service';
+import { CategoryResult, SiteResult } from '@/lib/types';
+import { CONFIG } from '@/lib/config';
+import { checkSite } from '@/lib/checkers/site';
+import { checkDpiProvider } from '@/lib/checkers/dpi-provider';
+
+function makeInitialCategories(status: SiteResult['status']): CategoryResult[] {
+  return CONFIG.map((cat) => ({
+    id: cat.id,
+    en: cat.en,
+    results: cat.sites.map((site) => ({
+      domain: site.d,
+      name: site.name,
+      flag: site.flag,
+      status,
+    })),
+  }));
+}
 
 export function useChecker() {
-  const [dpiResults, setDpiResults] = useState<DPIResult[]>(() =>
-    DPI_TESTS.map((test) => ({
-      id: test.id,
-      name: test.name,
-      country: test.country,
-      status: 'idle' as const,
-      blocked: false,
-    })),
+  const [categories, setCategories] = useState<CategoryResult[]>(() =>
+    makeInitialCategories('idle'),
   );
-
-  const [serviceResults, setServiceResults] = useState<ServiceResult[]>(() =>
-    SERVICES.map((service) => ({
-      id: service.id,
-      name: service.name,
-      icon: service.icon,
-      logo: service.logo,
-      status: 'idle' as const,
-      blocked: false,
-      details: [],
-    })),
-  );
-
-  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const [isChecking, setIsChecking] = useState(false);
+  const [checkedCount, setCheckedCount] = useState(0);
 
-  const fetchUserInfo = useCallback(async () => {
-    try {
-      const RIPE_API = 'https://stat.ripe.net/data/';
+  const totalCount = CONFIG.reduce((sum, cat) => sum + cat.sites.length, 0);
 
-      const ipRes = await fetch(RIPE_API + 'whats-my-ip/data.json');
-      const ipData = await ipRes.json();
-      const ip = ipData.data.ip;
-
-      const asnRes = await fetch(RIPE_API + `prefix-overview/data.json?resource=${ip}`);
-      const asnData = await asnRes.json();
-      const asn = asnData.data.asns[0];
-
-      const geoRes = await fetch(RIPE_API + `maxmind-geo-lite/data.json?resource=${ip}`);
-      const geoData = await geoRes.json();
-      const geo = geoData.data.located_resources[0]?.locations[0] || {};
-
-      setUserInfo({
-        ip,
-        asn: asn.asn,
-        holder: asn.holder,
-        country: geo.country || 'Unknown',
-        city: geo.city || 'Unknown',
-      });
-    } catch (error) {
-      console.error('Failed to fetch user info:', error);
-    }
-  }, []);
-
-  const runDPIChecks = useCallback(async () => {
-    const initialResults: DPIResult[] = DPI_TESTS.map((test) => ({
-      id: test.id,
-      name: test.name,
-      country: test.country,
-      status: 'checking',
-      blocked: false,
-    }));
-
-    setDpiResults(initialResults);
-
-    DPI_TESTS.forEach(async (test) => {
-      const result = await checkDPI(test);
-      setDpiResults((prev) => prev.map((r) => (r.id === result.id ? result : r)));
-    });
-
-    const results = await Promise.all(DPI_TESTS.map((test) => checkDPI(test)));
-    return results;
-  }, []);
-
-  const runServiceChecks = useCallback(async () => {
-    const initialResults: ServiceResult[] = SERVICES.map((service) => ({
-      id: service.id,
-      name: service.name,
-      icon: service.icon,
-      logo: service.logo,
-      status: 'checking',
-      blocked: false,
-      details: [],
-    }));
-
-    setServiceResults(initialResults);
-
-    SERVICES.forEach(async (service) => {
-      const result = await checkService(service);
-      setServiceResults((prev) => prev.map((r) => (r.id === result.id ? result : r)));
-    });
-
-    const results = await Promise.all(SERVICES.map((service) => checkService(service)));
-    return results;
-  }, []);
-
-  const runAllChecks = useCallback(async () => {
+  const runChecks = useCallback(async () => {
     setIsChecking(true);
+    setCheckedCount(0);
+    setCategories(makeInitialCategories('checking'));
 
-    try {
-      await Promise.all([runDPIChecks(), runServiceChecks()]);
-    } finally {
-      setIsChecking(false);
-    }
-  }, [runDPIChecks, runServiceChecks]);
+    const allChecks = CONFIG.flatMap((cat) =>
+      cat.sites.map((site) =>
+        (cat.id === 'providers' ? checkDpiProvider(site.d) : checkSite(site.d)).then((result) => {
+          setCheckedCount((prev) => prev + 1);
+          setCategories((prev) =>
+            prev.map((c) =>
+              c.id !== cat.id
+                ? c
+                : {
+                    ...c,
+                    results: c.results.map((r) =>
+                      r.domain === site.d
+                        ? {
+                            ...r,
+                            status: result.status,
+                            elapsed: result.elapsed,
+                            attempts: result.attempts,
+                          }
+                        : r,
+                    ),
+                  },
+            ),
+          );
+        }),
+      ),
+    );
+
+    await Promise.all(allChecks);
+    setIsChecking(false);
+  }, []);
 
   return {
-    dpiResults,
-    serviceResults,
-    userInfo,
+    categories,
     isChecking,
-    fetchUserInfo,
-    runDPIChecks,
-    runServiceChecks,
-    runAllChecks,
+    checkedCount,
+    totalCount,
+    runChecks,
   };
 }

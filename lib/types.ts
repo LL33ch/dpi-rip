@@ -1,58 +1,18 @@
-export interface DPITest {
-  id: string;
-  name: string;
-  provider: string;
-  country: string;
-  url: string;
-  expectedSize: number;
-  skipCacheBuster?: boolean;
-}
+export type SiteStatus = 'idle' | 'checking' | 'ok' | 'blocked' | 'dpi' | 'suspicious';
 
-export interface DPIResult {
-  id: string;
+export interface SiteResult {
+  domain: string;
   name: string;
-  country: string;
-  status: 'idle' | 'checking' | 'ok' | 'blocked' | 'suspicious' | 'error';
-  blocked: boolean;
-  totalBytes?: number;
-  chunks?: number[];
+  flag: string;
+  status: SiteStatus;
   elapsed?: number;
-  httpStatus?: number;
-  error?: string;
-  reason?: string;
+  attempts?: number;
 }
 
-export interface ServiceEndpoint {
-  url: string;
-  minSize?: number;
-  expectedStatus?: number;
-}
-
-export interface Service {
+export interface CategoryResult {
   id: string;
-  name: string;
-  icon?: string;
-  logo?: string;
-  endpoints: ServiceEndpoint[];
-}
-
-export interface ServiceResult {
-  id: string;
-  name: string;
-  icon?: string;
-  logo?: string;
-  status: 'idle' | 'checking' | 'ok' | 'blocked' | 'partial' | 'error';
-  blocked: boolean;
-  details: EndpointResult[];
-}
-
-export interface EndpointResult {
-  url: string;
-  accessible: boolean;
-  httpStatus?: number;
-  bytesReceived?: number;
-  error?: string;
-  elapsed?: number;
+  en: string;
+  results: SiteResult[];
 }
 
 export interface UserInfo {
