@@ -39,7 +39,6 @@ export const CONFIG = [
   {
     id: 'category-id',
     en: 'Category Name',
-    ru: 'Название категории',
     sites: [
       { d: 'example.com', flag: '🇺🇸', name: 'Example' },
     ],
