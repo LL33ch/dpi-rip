@@ -48,14 +48,16 @@ function SiteCard({ site }: { site: SiteResult }) {
       }`}
     >
       <span className='flex items-center gap-1.5 min-w-0'>
-        {cc && (
+        {!site.logo ? (
           <Image
             src={`https://flagcdn.com/h20/${cc}.webp`}
             width={20}
-            height={15}
+            height={20}
             alt={cc}
             className='shrink-0 h-4! w-6'
           />
+        ) : (
+          <Image src={site.logo} width={20} height={20} alt={cc} className='shrink-0 rounded' />
         )}
         <span className='truncate'>{site.name}</span>
       </span>
