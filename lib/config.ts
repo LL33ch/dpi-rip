@@ -41,6 +41,41 @@ export const CONFIG = [
     ],
   },
   {
+    id: 'geoblock',
+    en: 'GeoBlock check',
+    checker: 'cdn-trace',
+    sites: [
+      {
+        d: 'chatgpt.com',
+        flag: '🇺🇸',
+        name: 'ChatGPT',
+        logo: '/openai.svg',
+        blockedIn: ['CN', 'RU', 'BY', 'KP', 'CU', 'IR', 'SY', 'VE', 'MM'],
+      },
+      {
+        d: 'claude.ai',
+        flag: '🇺🇸',
+        name: 'Claude',
+        logo: '/anthropic.svg',
+        blockedIn: ['CN', 'RU', 'BY', 'KP', 'CU', 'IR', 'SY'],
+      },
+      {
+        d: 'grok.com',
+        flag: '🇺🇸',
+        name: 'Grok',
+        logo: '/grokai.svg',
+        blockedIn: ['CN', 'RU', 'KP', 'CU', 'IR', 'SY'],
+      },
+      {
+        d: 'perplexity.ai',
+        flag: '🇺🇸',
+        name: 'Perplexity',
+        logo: '/perplexityai.svg',
+        blockedIn: ['CN', 'KP', 'CU', 'IR', 'SY'],
+      },
+    ],
+  },
+  {
     id: 'social_intl',
     en: 'Social Media (International)',
     sites: [

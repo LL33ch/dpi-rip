@@ -1,11 +1,12 @@
 # DPI-CHECKER
 
-Internet Censorship & Blocking Detector — a client-side web tool for detecting DPI/TSPU blocking and checking the availability of popular websites.
+Internet Censorship & Blocking Detector — a client-side web tool for detecting DPI/TSPU blocking, checking site availability, and detecting AI service geo-restrictions.
 
 ## What it does
 
 - **TCP 16-20 DPI detection** — tests 35+ hosting providers using the TCP 16-20 method to detect deep packet inspection interference
-- **Site availability check** — checks 175+ websites across 16 categories (social media, news, messengers, streaming, etc.) with automatic retry on failure
+- **Site availability check** — checks 175+ websites across 17 categories (social media, news, messengers, streaming, etc.) with automatic retry on failure
+- **AI GeoBlock check** — detects whether AI services (ChatGPT, Claude, Grok, Perplexity) are geo-restricted for your actual exit IP, including split-tunnel and policy-based routing scenarios
 - **Network info** — displays your IP, ASN, ISP, and geolocation via RIPE API
 
 ## How DPI detection works
@@ -21,6 +22,21 @@ More about the method: [github.com/net4people/bbs/issues/490](https://github.com
 
 Provider suite from: [hyperion-cs/dpi-checkers](https://github.com/hyperion-cs/dpi-checkers)
 
+## How AI GeoBlock detection works
+
+AI services (ChatGPT, Claude, etc.) sit behind Cloudflare. Every Cloudflare-proxied domain exposes a `/cdn-cgi/trace` endpoint that returns the client IP and country as seen by Cloudflare — readable cross-origin.
+
+The checker fetches `https://{domain}/cdn-cgi/trace` for each AI service. Because the request goes to the actual service domain, it follows the user's routing policy — including split-tunnel VPN and domain-based routing rules (e.g. Keenetic, MikroTik). This means the IP and country returned reflect what the AI service actually sees, not the general browser IP.
+
+The `loc` field from the trace response is compared against each service's known blocked-country list. If the country matches, the status is `GeoBlocked`.
+
+```
+chatgpt.com/cdn-cgi/trace response:
+  ip=203.0.113.42   ← actual exit IP seen by ChatGPT
+  loc=PL            ← country seen by ChatGPT → checked against blockedIn list
+  colo=WAW          ← Cloudflare datacenter
+```
+
 ## Site check statuses
 
 | Status | Meaning |
@@ -29,24 +45,57 @@ Provider suite from: [hyperion-cs/dpi-checkers](https://github.com/hyperion-cs/d
 | Blocked | Unreachable (connection failed or timed out after 3 attempts) |
 | DPI | Host alive but POST 64KB timed out — DPI detected |
 | Suspicious | Large URI request timed out — possible DPI |
+| GeoBlocked | Reachable, but exit IP country is on the service's blocked-country list |
 
 ## Configuration
 
-Sites and categories are defined in `lib/config.ts`:
+Sites and categories are defined in `lib/config.ts`. Each category has an optional `checker` field:
 
 ```typescript
 export const CONFIG = [
+  // AI services — uses cdn-cgi/trace checker with per-service geo-block lists
   {
-    id: 'category-id',
-    en: 'Category Name',
+    id: 'ai',
+    en: 'AI Services (GeoBlock check)',
+    checker: 'cdn-trace',
     sites: [
-      { d: 'example.com', flag: '🇺🇸', name: 'Example' },
+      {
+        d: 'chatgpt.com',
+        flag: '🇺🇸',
+        name: 'ChatGPT',
+        logo: '/openai.svg',
+        blockedIn: ['CN', 'RU', 'BY', 'KP', 'CU', 'IR', 'SY', 'VE', 'MM'],
+      },
+    ],
+  },
+
+  // DPI providers — uses TCP 16-20 checker
+  {
+    id: 'providers',
+    en: 'Providers (TCP 16-20)',
+    sites: [
+      { d: 'example.com', flag: '🇺🇸', name: 'Provider' },
+    ],
+  },
+
+  // All other categories — uses simple HTTP reachability checker
+  {
+    id: 'social_intl',
+    en: 'Social Media (International)',
+    sites: [
+      { d: 'twitter.com', flag: '🇺🇸', name: 'X / Twitter', logo: '/twitter.svg' },
     ],
   },
 ];
 ```
 
-The `providers` category uses the TCP 16-20 checker (`lib/checkers/dpi-provider.ts`). All other categories use the simple HTTP checker (`lib/checkers/site.ts`) with 2 retries on failure.
+### Checkers
+
+| Category | Checker | File |
+|---|---|---|
+| `providers` | TCP 16-20 DPI detection | `lib/checkers/dpi-provider.ts` |
+| `ai` | `cdn-cgi/trace` + geo-block verdict | `lib/checkers/cdn-trace.ts` |
+| all others | Simple HTTP fetch with 2 retries | `lib/checkers/site.ts` |
 
 ## Stack
 
