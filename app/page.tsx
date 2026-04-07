@@ -6,6 +6,7 @@ import { CategoryResult, SiteResult } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { GitHubLink } from '@/components/GithubLink';
 import { UserInfo } from '@/components/UserInfo';
+import { cn } from '@/lib/utils';
 
 function flagToCode(flag: string): string {
   const chars = [...flag];
@@ -57,7 +58,16 @@ function SiteCard({ site }: { site: SiteResult }) {
             className='shrink-0 h-4! w-6'
           />
         ) : (
-          <Image src={site.logo} width={20} height={20} alt={cc} className='shrink-0 rounded' />
+          <Image
+            src={site.logo}
+            width={20}
+            height={20}
+            alt={cc}
+            className={cn(
+              'shrink-0 rounded',
+              ['checking', 'blocked', 'dpi'].includes(site.status) && 'grayscale',
+            )}
+          />
         )}
         <span className='truncate'>{site.name}</span>
       </span>
