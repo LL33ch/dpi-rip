@@ -42,7 +42,7 @@ export const CONFIG = [
   },
   {
     id: 'geoblock',
-    en: 'GeoBlock check',
+    en: 'GeoBlock',
     checker: 'cdn-trace',
     sites: [
       {
