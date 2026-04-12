@@ -1,11 +1,12 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { CategoryResult, SiteResult } from '@/lib/types';
+import { CategoryResult, SiteResult, SiteStatus } from '@/lib/types';
 import { CONFIG } from '@/lib/config';
 import { checkSite } from '@/lib/checkers/site';
 import { checkDpiProvider } from '@/lib/checkers/dpi-provider';
 import { checkCdnTrace } from '@/lib/checkers/cdn-trace';
+import { saveTestRun } from '@/lib/history';
 
 function makeInitialCategories(status: SiteResult['status']): CategoryResult[] {
   return CONFIG.map((cat) => ({
@@ -35,6 +36,8 @@ export function useChecker() {
     setCheckedCount(0);
     setCategories(makeInitialCategories('checking'));
 
+    const resultMap = new Map<string, SiteStatus>();
+
     const allChecks = CONFIG.flatMap((cat) =>
       cat.sites.map((site) =>
         (cat.id === 'providers'
@@ -43,6 +46,7 @@ export function useChecker() {
             ? checkCdnTrace(site.d, 'blockedIn' in site ? site.blockedIn : [])
             : checkSite(site.d)
         ).then((result) => {
+          resultMap.set(site.d, result.status as SiteStatus);
           setCheckedCount((prev) => prev + 1);
           setCategories((prev) =>
             prev.map((c) =>
@@ -72,6 +76,24 @@ export function useChecker() {
     );
 
     await Promise.all(allChecks);
+
+    saveTestRun({
+      timestamp: Date.now(),
+      categories: CONFIG.map((cat) => {
+        const statuses = cat.sites.map((s) => resultMap.get(s.d) ?? 'blocked');
+        return {
+          id: cat.id,
+          en: cat.en,
+          ok: statuses.filter((s) => s === 'ok').length,
+          blocked: statuses.filter((s) => s === 'blocked').length,
+          dpi: statuses.filter((s) => s === 'dpi').length,
+          suspicious: statuses.filter((s) => s === 'suspicious').length,
+          geoBlocked: statuses.filter((s) => s === 'geo-blocked').length,
+          total: statuses.length,
+        };
+      }),
+    });
+
     setIsChecking(false);
   }, []);
 
