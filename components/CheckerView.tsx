@@ -66,32 +66,36 @@ function SiteCard({
           )}
           <span className='font-medium'>{site.name}</span>
         </span>
-        {(site.status === 'ok' || site.status === 'geo-blocked') && site.traceIp && (
-          <span className='flex items-center gap-1.5 text-muted-foreground truncate'>
-            <span
-              className={`font-mono text-foreground transition-all ${!revealed ? 'blur-sm' : ''}`}
-            >
-              {site.traceIp}
+        <div className='flex gap-2'>
+          {(site.status === 'ok' || site.status === 'geo-blocked') && site.traceIp && (
+            <span className='flex items-center gap-1.5 text-muted-foreground truncate'>
+              <span
+                className={`font-mono text-foreground transition-all ${!revealed ? 'blur-sm' : ''}`}
+              >
+                {site.traceIp}
+              </span>
+              {site.traceLoc && (
+                <Image
+                  src={`https://flagcdn.com/h20/${site.traceLoc.toLowerCase()}.webp`}
+                  width={20}
+                  height={20}
+                  alt={site.traceLoc}
+                  className='rounded-xs'
+                />
+              )}
+              {site.traceWarp === 'on' && <span className='text-blue-400'>WARP</span>}
             </span>
-            {site.traceLoc && (
-              <Image
-                src={`https://flagcdn.com/h20/${site.traceLoc.toLowerCase()}.webp`}
-                width={20}
-                height={20}
-                alt={site.traceLoc}
-                className='rounded-xs'
-              />
-            )}
-            {site.traceWarp === 'on' && <span className='text-blue-400'>WARP</span>}
-          </span>
-        )}
-        {site.status === 'geo-blocked' && (
-          <span className='text-orange-400 shrink-0 font-bold'>GEOBLOCK</span>
-        )}
-        {site.status === 'blocked' && (
-          <span className='text-destructive shrink-0 font-bold'>BLOCKED</span>
-        )}
-        {site.status === 'checking' && <span className='text-muted-foreground shrink-0'>...</span>}
+          )}
+          {site.status === 'geo-blocked' && (
+            <span className='text-orange-400 shrink-0 font-bold'>GEOBLOCK</span>
+          )}
+          {site.status === 'blocked' && (
+            <span className='text-destructive shrink-0 font-bold'>BLOCKED</span>
+          )}
+          {site.status === 'checking' && (
+            <span className='text-muted-foreground shrink-0'>...</span>
+          )}
+        </div>
       </div>
     );
   }

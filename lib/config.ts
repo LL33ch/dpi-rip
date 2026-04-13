@@ -73,6 +73,20 @@ export const CONFIG = [
         logo: '/perplexityai.svg',
         blockedIn: ['CN', 'KP', 'CU', 'IR', 'SY'],
       },
+      {
+        d: 'notion.so',
+        flag: '🇺🇸',
+        name: 'Notion',
+        logo: '/notion.svg',
+        blockedIn: ['CN', 'RU', 'BY', 'KP', 'CU', 'IR', 'SY', 'VE', 'MM'],
+      },
+      {
+        d: '4pda.to',
+        flag: '🇺🇸',
+        name: '4PDA',
+        logo: '/4pda.png',
+        blockedIn: ['RU'],
+      },
     ],
   },
   {
