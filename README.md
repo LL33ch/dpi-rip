@@ -1,62 +1,65 @@
 # DPI-CHECKER
 
-Internet Censorship & Blocking Detector — a client-side web tool for detecting DPI/TSPU blocking, checking site availability, and detecting AI service geo-restrictions.
+🇷🇺 Русский | [🇬🇧 English](./README.en.md)
 
-## What it does
+Детектор интернет-цензуры и блокировок — клиентский веб-инструмент для обнаружения DPI/ТСПУ-блокировок, проверки доступности сайтов и определения геоблокировок через Cloudflare `cdn-cgi/trace`.
 
-- **TCP 16-20 DPI detection** — tests 35+ hosting providers using the TCP 16-20 method to detect deep packet inspection interference
-- **Site availability check** — checks 175+ websites across 17 categories (social media, news, messengers, streaming, etc.) with automatic retry on failure
-- **AI GeoBlock check** — detects whether AI services (ChatGPT, Claude, Grok, Perplexity) are geo-restricted for your actual exit IP, including split-tunnel and policy-based routing scenarios
-- **Network info** — displays your IP, ASN, ISP, and geolocation via RIPE API
+## Что умеет
 
-## How DPI detection works
+- **Детектирование DPI (TCP 16-20)** — тестирует 35+ хостинг-провайдеров методом TCP 16-20 для обнаружения вмешательства глубокой инспекции пакетов
+- **Проверка доступности сайтов** — проверяет 175+ сайтов в 17 категориях (соцсети, новости, мессенджеры, стриминг и др.) с автоматическим повтором при ошибке
+- **GeoBlock-проверка** — определяет, заблокированы ли сервисы (AI-ассистенты, стриминг и др.) по вашему реальному выходному IP, включая сценарии с split-tunnel VPN и маршрутизацией по домену
+- **Информация о сети** — отображает ваш IP, ASN, провайдера и геолокацию через RIPE API
+- **Статистика** — сохраняет историю тестов в localStorage и показывает графики доступности по ранам
 
-The **TCP 16-20** method works as follows:
+## Как работает детектирование DPI
 
-1. **Alive check** — verifies the host is reachable via a HEAD request
-2. **POST 64KB** — sends a 64KB POST body; if the connection times out while the host is alive, TSPU/DPI is cutting the stream → status `DPI`
-3. **Large URI** — sends repeated HEAD requests with ~7KB query strings (~63KB total); timeout → status `Suspicious`
-4. All checks pass → `OK`
+Метод **TCP 16-20** работает следующим образом:
 
-More about the method: [github.com/net4people/bbs/issues/490](https://github.com/net4people/bbs/issues/490)
+1. **Alive-проверка** — проверяет доступность хоста HEAD-запросом
+2. **POST 64 КБ** — отправляет тело 64 КБ; если соединение зависает при живом хосте — ТСПУ/DPI обрывает поток → статус `DPI`
+3. **Большой URI** — последовательные HEAD-запросы с ~7 КБ строками запроса (~63 КБ суммарно); таймаут → статус `Suspicious`
+4. Все проверки пройдены → `OK`
 
-Provider suite from: [hyperion-cs/dpi-checkers](https://github.com/hyperion-cs/dpi-checkers)
+Подробнее о методе: [github.com/net4people/bbs/issues/490](https://github.com/net4people/bbs/issues/490)
 
-## How AI GeoBlock detection works
+Набор провайдеров из: [hyperion-cs/dpi-checkers](https://github.com/hyperion-cs/dpi-checkers)
 
-AI services (ChatGPT, Claude, etc.) sit behind Cloudflare. Every Cloudflare-proxied domain exposes a `/cdn-cgi/trace` endpoint that returns the client IP and country as seen by Cloudflare — readable cross-origin.
+## Как работает GeoBlock-проверка
 
-The checker fetches `https://{domain}/cdn-cgi/trace` for each AI service. Because the request goes to the actual service domain, it follows the user's routing policy — including split-tunnel VPN and domain-based routing rules (e.g. Keenetic, MikroTik). This means the IP and country returned reflect what the AI service actually sees, not the general browser IP.
+Сервисы в категории GeoBlock проксируются через Cloudflare. Каждый домен за Cloudflare предоставляет эндпоинт `/cdn-cgi/trace`, который возвращает IP-адрес клиента и страну в том виде, как их видит Cloudflare — доступно для чтения из браузера без CORS-ограничений.
 
-The `loc` field from the trace response is compared against each service's known blocked-country list. If the country matches, the status is `GeoBlocked`.
+Чекер запрашивает `https://{domain}/cdn-cgi/trace` для каждого сервиса. Поскольку запрос идёт к реальному домену сервиса, он следует политике маршрутизации пользователя — включая split-tunnel VPN и маршрутизацию по домену (например, Keenetic, MikroTik). Это значит, что IP и страна в ответе отражают то, что видит сам сервис, а не общий IP браузера.
+
+Поле `loc` из ответа сравнивается со списком заблокированных стран для каждого сервиса. Если страна совпадает — статус `GeoBlocked`.
 
 ```
-chatgpt.com/cdn-cgi/trace response:
-  ip=203.0.113.42   ← actual exit IP seen by ChatGPT
-  loc=PL            ← country seen by ChatGPT → checked against blockedIn list
-  colo=WAW          ← Cloudflare datacenter
+chatgpt.com/cdn-cgi/trace ответ:
+  ip=203.0.113.42   ← реальный выходной IP, который видит сервис
+  loc=PL            ← страна, которую видит сервис → сверяется со списком blockedIn
+  colo=WAW          ← дата-центр Cloudflare
 ```
 
-## Site check statuses
+## Статусы проверки
 
-| Status | Meaning |
+| Статус | Значение |
 |---|---|
-| OK | Accessible |
-| Blocked | Unreachable (connection failed or timed out after 3 attempts) |
-| DPI | Host alive but POST 64KB timed out — DPI detected |
-| Suspicious | Large URI request timed out — possible DPI |
-| GeoBlocked | Reachable, but exit IP country is on the service's blocked-country list |
+| OK | Доступен |
+| Blocked | Недоступен (соединение не установлено или превышен таймаут после 3 попыток) |
+| DPI | Хост жив, но POST 64 КБ завис — обнаружен DPI |
+| Suspicious | Запрос с большим URI завис — возможен DPI |
+| GeoBlocked | Доступен, но страна выходного IP входит в список заблокированных |
 
-## Configuration
+## Конфигурация
 
-Sites and categories are defined in `lib/config.ts`. Each category has an optional `checker` field:
+Сайты и категории описаны в `lib/config.ts`. У каждой категории есть необязательное поле `checker`:
 
 ```typescript
 export const CONFIG = [
-  // AI services — uses cdn-cgi/trace checker with per-service geo-block lists
+  // GeoBlock-сервисы — используют cdn-cgi/trace чекер со списком стран для каждого сервиса
   {
-    id: 'ai',
-    en: 'AI Services (GeoBlock check)',
+    id: 'geoblock',
+    en: 'GeoBlock',
     checker: 'cdn-trace',
     sites: [
       {
@@ -69,7 +72,7 @@ export const CONFIG = [
     ],
   },
 
-  // DPI providers — uses TCP 16-20 checker
+  // DPI-провайдеры — используют TCP 16-20 чекер
   {
     id: 'providers',
     en: 'Providers (TCP 16-20)',
@@ -78,7 +81,7 @@ export const CONFIG = [
     ],
   },
 
-  // All other categories — uses simple HTTP reachability checker
+  // Все остальные категории — простая HTTP-проверка доступности
   {
     id: 'social_intl',
     en: 'Social Media (International)',
@@ -89,16 +92,16 @@ export const CONFIG = [
 ];
 ```
 
-### Checkers
+### Чекеры
 
-| Category | Checker | File |
+| Категория | Чекер | Файл |
 |---|---|---|
-| `providers` | TCP 16-20 DPI detection | `lib/checkers/dpi-provider.ts` |
-| `ai` | `cdn-cgi/trace` + geo-block verdict | `lib/checkers/cdn-trace.ts` |
-| all others | Simple HTTP fetch with 2 retries | `lib/checkers/site.ts` |
+| `providers` | Детектирование DPI методом TCP 16-20 | `lib/checkers/dpi-provider.ts` |
+| `geoblock` | `cdn-cgi/trace` + вердикт геоблокировки | `lib/checkers/cdn-trace.ts` |
+| все остальные | Простой HTTP-запрос с 2 повторами | `lib/checkers/site.ts` |
 
-## Stack
+## Стек
 
-- Next.js 16 / React 19
+- Next.js / React 19
 - Tailwind CSS v4 + shadcn/ui
 - TypeScript
