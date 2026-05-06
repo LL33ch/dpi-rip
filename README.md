@@ -1,6 +1,6 @@
 # DPI-CHECKER
 
-[🇷🇺 Русский](./README.md) | 🇬🇧 English
+[🇷🇺 Русский](./README.ru.md) | 🇬🇧 English
 
 Internet Censorship & Blocking Detector — a client-side web tool for detecting DPI/TSPU blocking, checking site availability, and detecting geo-restrictions via Cloudflare's `cdn-cgi/trace`.
 
