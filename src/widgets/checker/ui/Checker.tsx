@@ -33,11 +33,7 @@ function buildDonutData(arr: SiteResult[]) {
   return { chart, ok, dpi, geo, blocked, checking, total, okPct: pct(ok, total), started };
 }
 
-interface CheckerProps {
-  revealed: boolean;
-}
-
-export function Checker({ revealed }: CheckerProps) {
+export function Checker() {
   const { categories: rawCategories, isChecking, runChecks } = useChecker();
   const categories = useDeferredValue(rawCategories);
   const t = useTranslations('Checker');
@@ -72,11 +68,7 @@ export function Checker({ revealed }: CheckerProps) {
 
       <Stack>
         {categories.map((cat) => (
-          <CategorySection
-            key={cat.id}
-            cat={cat}
-            revealed={cat.id === 'geoblock' ? revealed : false}
-          />
+          <CategorySection key={cat.id} cat={cat} />
         ))}
       </Stack>
     </Stack>

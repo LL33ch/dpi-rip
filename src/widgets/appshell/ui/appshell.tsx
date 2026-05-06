@@ -2,8 +2,8 @@
 import { AppShell, Burger, Button, Container, Group, NavLink, Stack, Title } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { ChartLineIcon, ListChecksIcon, SparkleIcon } from '@phosphor-icons/react';
-import { LangChange } from '../../lang-change';
-import { GithubButton } from '../../github-button';
+import { LangChange } from '@widgets/lang-change';
+import { GithubButton } from '@widgets/github-button';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 

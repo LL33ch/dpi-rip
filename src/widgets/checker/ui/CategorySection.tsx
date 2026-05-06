@@ -8,10 +8,9 @@ import { useLocaleSwitch } from '@shared/i18n/LocaleProvider';
 
 interface CategorySectionProps {
   cat: CategoryResult;
-  revealed: boolean;
 }
 
-export const CategorySection = memo(function CategorySection({ cat, revealed }: CategorySectionProps) {
+export const CategorySection = memo(function CategorySection({ cat }: CategorySectionProps) {
   const isGeoBlock = cat.id === 'geoblock';
   const { locale } = useLocaleSwitch();
   const label = locale === 'ru' ? (cat.ru ?? cat.en) : cat.en;
@@ -24,7 +23,7 @@ export const CategorySection = memo(function CategorySection({ cat, revealed }: 
       {isGeoBlock ? (
         <Stack gap={4}>
           {cat.results.map((site) => (
-            <SiteCard key={site.domain} site={site} isGeoBlock revealed={revealed} />
+            <SiteCard key={site.domain} site={site} isGeoBlock />
           ))}
         </Stack>
       ) : (
