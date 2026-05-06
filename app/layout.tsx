@@ -5,7 +5,6 @@ import { Inter } from 'next/font/google';
 import { ColorSchemeScript, mantineHtmlProps } from '@mantine/core';
 import { Providers } from './providers';
 import { Metadata } from 'next';
-import { getLocale } from 'next-intl/server';
 import { LocaleProvider, type Locale } from '@/src/shared/i18n/LocaleProvider';
 import { AppShellMain } from '@/src/widgets/appshell';
 
@@ -17,8 +16,8 @@ export const metadata: Metadata = {
   keywords: ['dpi.rip', 'dpi', 'dpi-check', 'dpi-checker', 'тспу'],
 };
 
-export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const locale = (await getLocale()) as Locale;
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const locale: Locale = 'en';
 
   return (
     <html lang={locale} {...mantineHtmlProps}>
