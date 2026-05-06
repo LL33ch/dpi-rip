@@ -1,25 +1,36 @@
-import type { Metadata } from 'next';
-import { Inter, Geist } from 'next/font/google';
-import './globals.css';
-import { ThemeProvider } from '@/components/theme-provider';
-import { cn } from "@/lib/utils";
+import '@mantine/core/styles.css';
+import '@mantine/charts/styles.css';
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
+import { Inter } from 'next/font/google';
+import { ColorSchemeScript, mantineHtmlProps } from '@mantine/core';
+import { Providers } from './providers';
+import { Metadata } from 'next';
+import { getLocale } from 'next-intl/server';
+import { LocaleProvider, type Locale } from '@/src/shared/i18n/LocaleProvider';
+import { AppShellMain } from '@/src/widgets/appshell';
 
 const inter = Inter({ subsets: ['latin', 'cyrillic'] });
 
 export const metadata: Metadata = {
-  title: 'DPI-CHECKER | Internet Censorship & Blocking Detector',
+  title: 'DPI.RIP | Internet Censorship & Blocking Detector | DPI-CHECKER',
   description: 'Crowdsourced detection of internet censorship and DPI blocking.',
+  keywords: ['dpi.rip', 'dpi', 'dpi-check', 'dpi-checker', 'тспу'],
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const locale = (await getLocale()) as Locale;
+
   return (
-    <html lang='en' suppressHydrationWarning className={cn("font-sans", geist.variable)}>
+    <html lang={locale} {...mantineHtmlProps}>
+      <head>
+        <ColorSchemeScript defaultColorScheme='dark' />
+      </head>
       <body className={inter.className}>
-        <ThemeProvider attribute='class' defaultTheme='dark' enableSystem disableTransitionOnChange>
-          {children}
-        </ThemeProvider>
+        <Providers>
+          <LocaleProvider initialLocale={locale}>
+            <AppShellMain>{children}</AppShellMain>
+          </LocaleProvider>
+        </Providers>
       </body>
     </html>
   );

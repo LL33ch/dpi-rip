@@ -1,0 +1,63 @@
+{
+  "AppShell": {
+    "title": "DPI.RIP",
+    "subtitle": "Internet Censorship & Blocking Detector",
+    "checker": "Checker",
+    "statistics": "Statistics",
+    "ipWhitelistCheck": "IP Whitelist Check"
+  },
+  "UserInfo": {
+    "ip": "IP",
+    "splitTunneling": "Split Tunneling",
+    "provider": "Provider",
+    "country": "Country"
+  },
+  "Checker": {
+    "runCheck": "Run Check",
+    "ruAvailability": ".ru sites availability",
+    "foreignAvailability": "Foreign sites availability"
+  },
+  "SiteCard": {
+    "warp": "WARP",
+    "geoblock": "GEOBLOCK",
+    "blocked": "BLOCKED",
+    "dpi": "DPI"
+  },
+  "WlIpChecker": {
+    "title": "IP Whitelist Check",
+    "base": "Database",
+    "subtitle": "verified IPs + subnets (verified + raw)",
+    "checkButton": "Check",
+    "labelAs": "AS",
+    "labelAsn": "ASN",
+    "labelLoc": "LOC",
+    "footer": "Score reflects the probability that the IP is whitelisted — accessible via mobile internet in Russia during connectivity restrictions.",
+    "errorInvalidIp": "Enter a valid IPv4 address",
+    "errorLoadFailed": "Database loading error",
+    "stepLoading": "Loading databases...",
+    "stepAnalyzing": "Analyzing...",
+    "sourceVerified": "Verified IPs",
+    "sourceSubnetsVerified": "Subnets (verified)",
+    "sourceSubnetsRaw": "Subnets (raw)",
+    "statusNone": "Not found",
+    "statusCidr": "Subnet matches, IP not in list",
+    "statusDirect": "Found directly",
+    "verdictConfirmed": "Confirmed",
+    "verdictHigh": "High probability",
+    "verdictMedium": "Medium probability",
+    "verdictLow": "Low probability",
+    "verdictNone": "Not found"
+  },
+  "Stats": {
+    "empty": "No test history yet",
+    "emptyHint": "Run a check in the Checker tab",
+    "totalRuns": "Total runs",
+    "avgAvailability": "Avg availability",
+    "best": "Best",
+    "worst": "Worst",
+    "availabilityPerRun": "Availability per run",
+    "clearHistory": "Clear history",
+    "available": "Available",
+    "blocked": "Blocked"
+  }
+}

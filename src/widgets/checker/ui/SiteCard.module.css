@@ -1,0 +1,23 @@
+.card[data-status='ok'] {
+  background-color: color-mix(in srgb, var(--mantine-color-green-9) 35%, transparent);
+}
+.card[data-status='blocked'] {
+  background-color: color-mix(in srgb, var(--mantine-color-red-9) 35%, transparent);
+}
+.card[data-status='dpi'] {
+  background-color: color-mix(in srgb, var(--mantine-color-orange-9) 35%, transparent);
+}
+.card[data-status='suspicious'] {
+  background-color: color-mix(in srgb, var(--mantine-color-yellow-9) 35%, transparent);
+}
+.card[data-status='geo-blocked'] {
+  background-color: color-mix(in srgb, var(--mantine-color-orange-9) 35%, transparent);
+}
+.card[data-status='checking'] {
+  background-color: var(--mantine-color-dark-4);
+  opacity: 0.5;
+}
+.card[data-status='idle'] {
+  background-color: var(--mantine-color-dark-4);
+  opacity: 0.5;
+}

@@ -1,107 +1,36 @@
-# DPI-CHECKER
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-🇷🇺 Русский | [🇬🇧 English](./README.en.md)
+## Getting Started
 
-Детектор интернет-цензуры и блокировок — клиентский веб-инструмент для обнаружения DPI/ТСПУ-блокировок, проверки доступности сайтов и определения геоблокировок через Cloudflare `cdn-cgi/trace`.
+First, run the development server:
 
-## Что умеет
-
-- **Детектирование DPI (TCP 16-20)** — тестирует 35+ хостинг-провайдеров методом TCP 16-20 для обнаружения вмешательства глубокой инспекции пакетов
-- **Проверка доступности сайтов** — проверяет 175+ сайтов в 17 категориях (соцсети, новости, мессенджеры, стриминг и др.) с автоматическим повтором при ошибке
-- **GeoBlock-проверка** — определяет, заблокированы ли сервисы (AI-ассистенты, стриминг и др.) по вашему реальному выходному IP, включая сценарии с split-tunnel VPN и маршрутизацией по домену
-- **Информация о сети** — отображает ваш IP, ASN, провайдера и геолокацию через RIPE API
-- **Статистика** — сохраняет историю тестов в localStorage и показывает графики доступности по ранам
-
-## Как работает детектирование DPI
-
-Метод **TCP 16-20** работает следующим образом:
-
-1. **Alive-проверка** — проверяет доступность хоста HEAD-запросом
-2. **POST 64 КБ** — отправляет тело 64 КБ; если соединение зависает при живом хосте — ТСПУ/DPI обрывает поток → статус `DPI`
-3. **Большой URI** — последовательные HEAD-запросы с ~7 КБ строками запроса (~63 КБ суммарно); таймаут → статус `Suspicious`
-4. Все проверки пройдены → `OK`
-
-Подробнее о методе: [github.com/net4people/bbs/issues/490](https://github.com/net4people/bbs/issues/490)
-
-Набор провайдеров из: [hyperion-cs/dpi-checkers](https://github.com/hyperion-cs/dpi-checkers)
-
-## Как работает GeoBlock-проверка
-
-Сервисы в категории GeoBlock проксируются через Cloudflare. Каждый домен за Cloudflare предоставляет эндпоинт `/cdn-cgi/trace`, который возвращает IP-адрес клиента и страну в том виде, как их видит Cloudflare — доступно для чтения из браузера без CORS-ограничений.
-
-Чекер запрашивает `https://{domain}/cdn-cgi/trace` для каждого сервиса. Поскольку запрос идёт к реальному домену сервиса, он следует политике маршрутизации пользователя — включая split-tunnel VPN и маршрутизацию по домену (например, Keenetic, MikroTik). Это значит, что IP и страна в ответе отражают то, что видит сам сервис, а не общий IP браузера.
-
-Поле `loc` из ответа сравнивается со списком заблокированных стран для каждого сервиса. Если страна совпадает — статус `GeoBlocked`.
-
-```
-chatgpt.com/cdn-cgi/trace ответ:
-  ip=203.0.113.42   ← реальный выходной IP, который видит сервис
-  loc=PL            ← страна, которую видит сервис → сверяется со списком blockedIn
-  colo=WAW          ← дата-центр Cloudflare
+```bash
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
 ```
 
-## Статусы проверки
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-| Статус | Значение |
-|---|---|
-| OK | Доступен |
-| Blocked | Недоступен (соединение не установлено или превышен таймаут после 3 попыток) |
-| DPI | Хост жив, но POST 64 КБ завис — обнаружен DPI |
-| Suspicious | Запрос с большим URI завис — возможен DPI |
-| GeoBlocked | Доступен, но страна выходного IP входит в список заблокированных |
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-## Конфигурация
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-Сайты и категории описаны в `lib/config.ts`. У каждой категории есть необязательное поле `checker`:
+## Learn More
 
-```typescript
-export const CONFIG = [
-  // GeoBlock-сервисы — используют cdn-cgi/trace чекер со списком стран для каждого сервиса
-  {
-    id: 'geoblock',
-    en: 'GeoBlock',
-    checker: 'cdn-trace',
-    sites: [
-      {
-        d: 'chatgpt.com',
-        flag: '🇺🇸',
-        name: 'ChatGPT',
-        logo: '/openai.svg',
-        blockedIn: ['CN', 'RU', 'BY', 'KP', 'CU', 'IR', 'SY', 'VE', 'MM'],
-      },
-    ],
-  },
+To learn more about Next.js, take a look at the following resources:
 
-  // DPI-провайдеры — используют TCP 16-20 чекер
-  {
-    id: 'providers',
-    en: 'Providers (TCP 16-20)',
-    sites: [
-      { d: 'example.com', flag: '🇺🇸', name: 'Provider' },
-    ],
-  },
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-  // Все остальные категории — простая HTTP-проверка доступности
-  {
-    id: 'social_intl',
-    en: 'Social Media (International)',
-    sites: [
-      { d: 'twitter.com', flag: '🇺🇸', name: 'X / Twitter', logo: '/twitter.svg' },
-    ],
-  },
-];
-```
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-### Чекеры
+## Deploy on Vercel
 
-| Категория | Чекер | Файл |
-|---|---|---|
-| `providers` | Детектирование DPI методом TCP 16-20 | `lib/checkers/dpi-provider.ts` |
-| `geoblock` | `cdn-cgi/trace` + вердикт геоблокировки | `lib/checkers/cdn-trace.ts` |
-| все остальные | Простой HTTP-запрос с 2 повторами | `lib/checkers/site.ts` |
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
-## Стек
-
-- Next.js / React 19
-- Tailwind CSS v4 + shadcn/ui
-- TypeScript
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.

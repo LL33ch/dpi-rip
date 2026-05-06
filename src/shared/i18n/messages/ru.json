@@ -1,0 +1,63 @@
+{
+  "AppShell": {
+    "title": "DPI.RIP",
+    "subtitle": "Детектор цензуры и блокировок интернета",
+    "checker": "Проверка",
+    "statistics": "Статистика",
+    "ipWhitelistCheck": "Проверка IP в БС"
+  },
+  "UserInfo": {
+    "ip": "IP",
+    "splitTunneling": "Split Tunneling",
+    "provider": "Провайдер",
+    "country": "Страна"
+  },
+  "Checker": {
+    "runCheck": "Запустить проверку",
+    "ruAvailability": "Доступность .ru сайтов",
+    "foreignAvailability": "Доступность зарубежных сайтов"
+  },
+  "SiteCard": {
+    "warp": "WARP",
+    "geoblock": "ГЕО-БЛОК",
+    "blocked": "ЗАБЛОКИРОВАН",
+    "dpi": "DPI"
+  },
+  "WlIpChecker": {
+    "title": "Проверка IP в белых списках",
+    "base": "База",
+    "subtitle": "verified IPs + подсети (проверенные + сырые)",
+    "checkButton": "Проверить",
+    "labelAs": "AS",
+    "labelAsn": "ASN",
+    "labelLoc": "LOC",
+    "footer": "Шанс отражает вероятность того, что IP входит в белый список адресов, доступных через мобильный интернет России в условиях ограничений.",
+    "errorInvalidIp": "Введите корректный IPv4 адрес",
+    "errorLoadFailed": "Ошибка загрузки баз данных",
+    "stepLoading": "Загрузка баз данных...",
+    "stepAnalyzing": "Анализ...",
+    "sourceVerified": "Проверенные IP",
+    "sourceSubnetsVerified": "Подсети (проверенные)",
+    "sourceSubnetsRaw": "Подсети (сырые)",
+    "statusNone": "Не найден",
+    "statusCidr": "Подсеть совпадает, IP не в списке",
+    "statusDirect": "Найден напрямую",
+    "verdictConfirmed": "Подтверждён",
+    "verdictHigh": "Высокая вероятность",
+    "verdictMedium": "Средняя вероятность",
+    "verdictLow": "Низкая вероятность",
+    "verdictNone": "Не найден"
+  },
+  "Stats": {
+    "empty": "История проверок пуста",
+    "emptyHint": "Запустите проверку на вкладке Проверка",
+    "totalRuns": "Всего запусков",
+    "avgAvailability": "Средняя доступность",
+    "best": "Лучшая",
+    "worst": "Худшая",
+    "availabilityPerRun": "Доступность по запускам",
+    "clearHistory": "Очистить историю",
+    "available": "Доступно",
+    "blocked": "Заблокировано"
+  }
+}
