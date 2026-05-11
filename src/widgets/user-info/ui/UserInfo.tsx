@@ -12,10 +12,12 @@ import {
   Text,
   ThemeIcon,
 } from '@mantine/core';
-import { CityIcon, GlobeIcon, MapPinIcon, NetworkIcon } from '@phosphor-icons/react';
+import { GlobeIcon, MapPinIcon, NetworkIcon } from '@phosphor-icons/react';
 import ReactCountryFlag from 'react-country-flag';
+import Image from 'next/image';
 import type { UserInfo as UserInfoModel } from '@shared/model';
 import { useLocale, useTranslations } from 'next-intl';
+import { SiteLogo } from '../../site-logo';
 
 interface IpProbe {
   label: string;
@@ -23,22 +25,15 @@ interface IpProbe {
 }
 
 async function fetchUserInfo(): Promise<UserInfoModel> {
-  const RIPE_API = 'https://stat.ripe.net/data/';
-  const ipRes = await fetch(RIPE_API + 'whats-my-ip/data.json');
-  const ipData = await ipRes.json();
-  const ip = ipData.data.ip;
-  const [asnData, geoData] = await Promise.all([
-    fetch(RIPE_API + `prefix-overview/data.json?resource=${ip}`).then((r) => r.json()),
-    fetch(RIPE_API + `maxmind-geo-lite/data.json?resource=${ip}`).then((r) => r.json()),
-  ]);
-  const asn = asnData.data.asns[0];
-  const geo = geoData.data.located_resources[0]?.locations[0] || {};
+  const res = await fetch('https://api.ipapi.is/', { cache: 'no-store' });
+  const data = await res.json();
   return {
-    ip,
-    asn: asn.asn,
-    holder: asn.holder,
-    country: geo.country || 'Unknown',
-    city: geo.city || 'Unknown',
+    ip: data.ip,
+    asn: data.asn?.asn ?? 0,
+    holder: data.company?.name ?? data.asn?.org ?? '',
+    domain: data.company?.domain ?? data.asn?.domain,
+    country: data.location?.country_code ?? '',
+    city: data.location?.city ?? '',
   };
 }
 
@@ -77,10 +72,9 @@ async function fetchIpProbes(): Promise<IpProbe[]> {
 export function UserInfo() {
   const [userInfo, setUserInfo] = useState<UserInfoModel | null>(null);
   const [probes, setProbes] = useState<IpProbe[] | null>(null);
-  const [showIp, setShowIp] = useState<boolean>(false);
-  const [showCountry, setShowCountry] = useState<boolean>(false);
-
-  const [showProvider, setShowProvider] = useState<boolean>(false);
+  const [showIp, setShowIp] = useState(false);
+  const [showCountry, setShowCountry] = useState(false);
+  const [showProvider, setShowProvider] = useState(false);
 
   const t = useTranslations('UserInfo');
   const locale = useLocale();
@@ -94,8 +88,8 @@ export function UserInfo() {
   const splitProbes = probes?.filter((p) => p.ip !== mainIp) ?? [];
   const hasSplitRouting = probes !== null && splitProbes.length > 0;
 
-  function getCountry(country: string) {
-    return new Intl.DisplayNames([locale], { type: 'region' }).of(country);
+  function getCountry(code: string) {
+    return new Intl.DisplayNames([locale], { type: 'region' }).of(code);
   }
 
   return (
@@ -137,6 +131,7 @@ export function UserInfo() {
             </Stack>
           </Group>
         </Card>
+
         <Card>
           <Group gap='md' wrap='nowrap'>
             <ThemeIcon color='teal' radius='lg' size='xl' variant='soft'>
@@ -147,20 +142,24 @@ export function UserInfo() {
                 {t('provider')}
               </Text>
               {userInfo ? (
-                <Text
-                  size='sm'
-                  truncate='end'
+                <Group
+                  gap={4}
+                  wrap='nowrap'
                   style={{ filter: !showProvider ? 'blur(4px)' : 'none', cursor: 'pointer' }}
                   onClick={() => setShowProvider(!showProvider)}
                 >
-                  {userInfo.holder}
-                </Text>
+                  {userInfo.domain && showProvider && <SiteLogo d={userInfo.domain} />}
+                  <Text size='sm' truncate='end'>
+                    {userInfo.holder}
+                  </Text>
+                </Group>
               ) : (
                 <Skeleton height={20} />
               )}
             </Stack>
           </Group>
         </Card>
+
         <Card>
           <Group gap='md' wrap='nowrap'>
             <ThemeIcon color='violet' radius='lg' size='xl' variant='soft'>
@@ -171,14 +170,19 @@ export function UserInfo() {
                 {t('country')}
               </Text>
               {userInfo ? (
-                <Flex align='center' gap={4} onClick={() => setShowCountry(!showCountry)}>
-                  {showCountry && (
+                <Flex
+                  align='center'
+                  gap={4}
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => setShowCountry(!showCountry)}
+                >
+                  {showCountry && userInfo.country && (
                     <ReactCountryFlag countryCode={userInfo.country} title={userInfo.country} svg />
                   )}
                   <Text
                     size='sm'
                     truncate='end'
-                    style={{ filter: !showCountry ? 'blur(4px)' : 'none', cursor: 'pointer' }}
+                    style={{ filter: !showCountry ? 'blur(4px)' : 'none' }}
                   >
                     {getCountry(userInfo.country)}
                   </Text>

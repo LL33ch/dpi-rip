@@ -2,7 +2,9 @@
 
 import { Button, Menu } from '@mantine/core';
 import ReactCountryFlag from 'react-country-flag';
-import { useLocaleSwitch, SUPPORTED_LOCALES, type Locale } from '@shared/i18n/LocaleProvider';
+import { useLocale } from 'next-intl';
+import { usePathname, useRouter } from '@/src/shared/i18n/navigation';
+import { routing, type Locale } from '@/src/shared/i18n/routing';
 
 const LOCALE_META: Record<Locale, { label: string; flag: string }> = {
   en: { label: 'English', flag: 'GB' },
@@ -10,8 +12,15 @@ const LOCALE_META: Record<Locale, { label: string; flag: string }> = {
 };
 
 export function LangChange() {
-  const { locale, setLocale } = useLocaleSwitch();
+  const locale = useLocale() as Locale;
+  const router = useRouter();
+  const pathname = usePathname();
   const current = LOCALE_META[locale];
+
+  function switchLocale(code: Locale) {
+    localStorage.setItem('locale', code);
+    router.replace(pathname, { locale: code });
+  }
 
   return (
     <Menu shadow='md' position='bottom-end'>
@@ -26,11 +35,11 @@ export function LangChange() {
       </Menu.Target>
 
       <Menu.Dropdown>
-        {SUPPORTED_LOCALES.map((code) => (
+        {routing.locales.map((code) => (
           <Menu.Item
             key={code}
             leftSection={<ReactCountryFlag countryCode={LOCALE_META[code].flag} svg />}
-            onClick={() => setLocale(code)}
+            onClick={() => switchLocale(code)}
             fw={code === locale ? 700 : undefined}
           >
             {LOCALE_META[code].label}

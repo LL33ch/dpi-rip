@@ -2,7 +2,7 @@
 
 import { clearHistory, STORAGE_KEY, subscribeHistory, TestRun } from '@/src/shared/lib';
 import { CONFIG } from '@shared/config';
-import { useLocaleSwitch } from '@shared/i18n/LocaleProvider';
+import { useLocale } from 'next-intl';
 import { BarChart, BarsList } from '@mantine/charts';
 import { Button, Card, Group, SimpleGrid, Stack, Text } from '@mantine/core';
 import { useTranslations } from 'next-intl';
@@ -71,7 +71,7 @@ function buildChartData(history: TestRun[]) {
 
 export function StatsView() {
   const t = useTranslations('Stats');
-  const { locale } = useLocaleSwitch();
+  const locale = useLocale();
 
   const raw = useSyncExternalStore(subscribeHistory, getSnapshot, getServerSnapshot);
   const history = useMemo(() => parseHistory(raw), [raw]);

@@ -32,6 +32,7 @@ export interface UserInfo {
   ip: string;
   asn: number;
   holder: string;
+  domain?: string;
   country: string;
   city: string;
 }

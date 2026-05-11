@@ -1,49 +1,28 @@
 'use client';
 
 import { memo, useState } from 'react';
-import Image from 'next/image';
 import { Box, Flex, Group, Loader, Paper, Text } from '@mantine/core';
 import ReactCountryFlag from 'react-country-flag';
 import type { SiteResult } from '@shared/model';
 import styles from './SiteCard.module.css';
 import { useTranslations } from 'next-intl';
+import { SiteLogo } from '../../site-logo';
 
 interface SiteCardProps {
   site: SiteResult;
-  isGeoBlock?: boolean;
+  categoryId?: string;
 }
 
-export const SiteCard = memo(function SiteCard({ site, isGeoBlock }: SiteCardProps) {
+export const SiteCard = memo(function SiteCard({ site, categoryId }: SiteCardProps) {
   const [showIp, setShowIp] = useState<boolean>(false);
   const t = useTranslations('SiteCard');
 
-  const grayscale = site.status !== 'ok' ? 'grayscale(100%)' : 'none';
-
-  if (isGeoBlock) {
+  if (categoryId === 'geoblock') {
     return (
       <Paper p={5} className={styles.card} data-status={site.status} radius='sm'>
         <Flex align='center' gap={6}>
-          {site.logo ? (
-            <Image
-              src={site.logo}
-              width={20}
-              height={20}
-              alt={site.name}
-              style={{ filter: grayscale }}
-            />
-          ) : (
-            site.flag && (
-              <ReactCountryFlag
-                countryCode={site.flag}
-                svg
-                style={{
-                  filter: grayscale,
-                  width: '1.25em',
-                  height: '1.25em',
-                }}
-              />
-            )
-          )}
+          <SiteLogo d={site.domain} />
+
           <Text size='xs' truncate>
             {site.name}
           </Text>
@@ -95,27 +74,19 @@ export const SiteCard = memo(function SiteCard({ site, isGeoBlock }: SiteCardPro
   return (
     <Paper p={5} className={styles.card} data-status={site.status} radius='sm'>
       <Flex align='center' gap={6}>
-        {site.logo ? (
-          <Image
-            src={site.logo}
-            width={20}
-            height={20}
-            alt={site.name}
-            style={{ filter: grayscale }}
+        {categoryId === 'providers' ? (
+          <ReactCountryFlag
+            countryCode={site.flag}
+            svg
+            style={{
+              width: '1.25em',
+              height: '1.25em',
+            }}
           />
         ) : (
-          site.flag && (
-            <ReactCountryFlag
-              countryCode={site.flag}
-              svg
-              style={{
-                filter: grayscale,
-                width: '1.25em',
-                height: '1.25em',
-              }}
-            />
-          )
+          <SiteLogo d={site.domain} />
         )}
+
         <Text size='xs' truncate>
           {site.name}
         </Text>

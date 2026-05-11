@@ -7,11 +7,11 @@ const nextConfig: NextConfig = {
     loaderFile: './src/shared/lib/image-loader.ts',
     remotePatterns: [
       {
-        hostname: 'www.google.com',
+        hostname: 'icons.duckduckgo.com',
       },
     ],
   },
 };
 
-const withNextIntl = createNextIntlPlugin('./src/shared/i18n/config.ts');
+const withNextIntl = createNextIntlPlugin('./src/shared/i18n/request.ts');
 export default withNextIntl(nextConfig);

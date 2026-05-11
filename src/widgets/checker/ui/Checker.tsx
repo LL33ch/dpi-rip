@@ -55,6 +55,7 @@ export function Checker() {
               thickness={24}
               withTooltip={false}
               chartLabel={`${all.okPct}%`}
+              visibleFrom='xs'
             />
             <SimpleGrid cols={2} spacing='xs'>
               <StatRow label='OK' count={all.ok} total={all.total} color='green' />

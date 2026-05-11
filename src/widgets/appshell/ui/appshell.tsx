@@ -5,7 +5,7 @@ import { ChartLineIcon, ListChecksIcon, SparkleIcon } from '@phosphor-icons/reac
 import { LangChange } from '@widgets/lang-change';
 import { GithubButton } from '@widgets/github-button';
 import { useTranslations } from 'next-intl';
-import Link from 'next/link';
+import { Link } from '@/src/shared/i18n/navigation';
 
 export function AppShellMain({ children }: { children: React.ReactNode }) {
   const [opened, { toggle }] = useDisclosure();

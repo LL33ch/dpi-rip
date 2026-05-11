@@ -2,14 +2,15 @@
 
 [🇷🇺 Русский](./README.ru.md) | 🇬🇧 English
 
-Internet Censorship & Blocking Detector — a client-side web tool for detecting DPI/TSPU blocking, checking site availability, and detecting geo-restrictions via Cloudflare's `cdn-cgi/trace`.
+Internet Censorship & Blocking Detector — a client-side web tool for detecting DPI/TSPU blocking, checking site availability, detecting geo-restrictions, and checking if an IP is whitelisted on Russia's mobile internet.
 
 ## What it does
 
 - **TCP 16-20 DPI detection** — tests 35+ hosting providers using the TCP 16-20 method to detect deep packet inspection interference
 - **Site availability check** — checks 175+ websites across 17 categories (social media, news, messengers, streaming, etc.) with automatic retry on failure
 - **GeoBlock check** — detects whether services (AI assistants, streaming platforms, etc.) are geo-restricted for your actual exit IP, including split-tunnel and policy-based routing scenarios
-- **Network info** — displays your IP, ASN, ISP, and geolocation via RIPE API
+- **IP Whitelist check** — checks if any IPv4 address is present in Russia's mobile internet whitelist ([zarazaex/TWL](https://github.com/openlibrecommunity/twl)), with subnet-level scoring and ISP info via [ipapi.is](https://ipapi.is)
+- **Network info** — displays your IP, ASN, ISP (with favicon), and geolocation via [ipapi.is](https://ipapi.is)
 - **Statistics** — saves test history to localStorage and displays availability charts across runs
 
 ## How DPI detection works
@@ -40,6 +41,22 @@ chatgpt.com/cdn-cgi/trace response:
   colo=WAW          ← Cloudflare datacenter
 ```
 
+## How IP Whitelist check works
+
+Checks whether an IPv4 address is present in the [zarazaex/TWL](https://github.com/openlibrecommunity/twl) whitelist — a crowdsourced list of IPs accessible via Russian mobile internet during connectivity restrictions.
+
+Three sources are checked in parallel:
+
+| Source | Description | Max score |
+| ------ | ----------- | --------- |
+| `verified.txt` | Direct IP match in the verified list | 95% |
+| `subnets.c.json` | IP falls within a verified subnet | up to 90% |
+| `subnets.json` | IP falls within a raw (unverified) subnet | up to 70% |
+
+Score formula for subnet matches: `maxScore × (base + 0.4 × subnet_fill%)`, where `base` is 0.5 for verified subnets and 0.3 for raw subnets. The final score is the maximum across all sources.
+
+ISP information (org name, ASN, country, city) is fetched from [ipapi.is](https://ipapi.is).
+
 ## Site check statuses
 
 | Status     | Meaning                                                                 |
@@ -52,7 +69,7 @@ chatgpt.com/cdn-cgi/trace response:
 
 ## Configuration
 
-Sites and categories are defined in `lib/config.ts`. Each category has an optional `checker` field:
+Sites and categories are defined in `src/shared/config/config.ts`. Each category has an optional `checker` field:
 
 ```typescript
 export const CONFIG = [
@@ -64,9 +81,7 @@ export const CONFIG = [
     sites: [
       {
         d: 'chatgpt.com',
-        flag: '🇺🇸',
         name: 'ChatGPT',
-        logo: '/openai.svg',
         blockedIn: ['CN', 'RU', 'BY', 'KP', 'CU', 'IR', 'SY', 'VE', 'MM'],
       },
     ],
@@ -76,28 +91,30 @@ export const CONFIG = [
   {
     id: 'providers',
     en: 'Providers (TCP 16-20)',
-    sites: [{ d: 'example.com', flag: '🇺🇸', name: 'Provider' }],
+    sites: [{ d: 'example.com', flag: 'US', name: 'Provider' }],
   },
 
   // All other categories — uses simple HTTP reachability checker
   {
     id: 'social_intl',
     en: 'Social Media (International)',
-    sites: [{ d: 'twitter.com', flag: '🇺🇸', name: 'X / Twitter', logo: '/twitter.svg' }],
+    ru: 'Соцсети (международные)',
+    sites: [{ d: 'twitter.com', name: 'X / Twitter' }],
   },
 ];
 ```
 
 ### Checkers
 
-| Category    | Checker                             | File                           |
-| ----------- | ----------------------------------- | ------------------------------ |
-| `providers` | TCP 16-20 DPI detection             | `lib/checkers/dpi-provider.ts` |
-| `geoblock`  | `cdn-cgi/trace` + geo-block verdict | `lib/checkers/cdn-trace.ts`    |
-| all others  | Simple HTTP fetch with 2 retries    | `lib/checkers/site.ts`         |
+| Category    | Checker                             | File                              |
+| ----------- | ----------------------------------- | --------------------------------- |
+| `providers` | TCP 16-20 DPI detection             | `src/shared/api/check-dpi-provider.ts` |
+| `geoblock`  | `cdn-cgi/trace` + geo-block verdict | `src/shared/api/check-cdn-trace.ts`    |
+| all others  | Simple HTTP fetch with 2 retries    | `src/shared/api/check-site.ts`         |
 
 ## Stack
 
-- Next.js / React 19
-- Tailwind CSS v4 + shadcn/ui
+- Next.js 16 / React 19
+- Mantine UI v9
+- next-intl (EN / RU, locale in URL: `/en/`, `/ru/`)
 - TypeScript
