@@ -15,7 +15,6 @@ function makeInitialCategories(status: SiteResult['status']): CategoryResult[] {
       domain: site.d,
       name: site.name,
       flag: site.flag,
-      logo: site.logo,
       status,
     })),
   }));

@@ -11,7 +11,6 @@ export interface SiteResult {
   domain: string;
   name: string;
   flag: string;
-  logo?: string;
   status: SiteStatus;
   elapsed?: number;
   attempts?: number;
