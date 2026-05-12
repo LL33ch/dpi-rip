@@ -1,12 +1,24 @@
 'use client';
 
 import { useDeferredValue } from 'react';
-import { Box, Button, Card, Group, SimpleGrid, Stack, Text } from '@mantine/core';
+import {
+  Box,
+  Button,
+  Card,
+  Group,
+  Progress,
+  SimpleGrid,
+  Stack,
+  Text,
+  rgba,
+  useMantineTheme,
+} from '@mantine/core';
 import { DonutChart } from '@mantine/charts';
 import { useChecker } from '../model/useChecker';
 import { CategorySection } from './CategorySection';
 import { useTranslations } from 'next-intl';
 import type { SiteResult } from '@shared/model';
+import classes from './Checker.module.css';
 
 const pct = (count: number, total: number) => (total > 0 ? Math.round((count / total) * 100) : 0);
 
@@ -34,16 +46,37 @@ function buildDonutData(arr: SiteResult[]) {
 }
 
 export function Checker() {
-  const { categories: rawCategories, isChecking, runChecks } = useChecker();
+  const {
+    categories: rawCategories,
+    isChecking,
+    checkedCount,
+    totalCount,
+    runChecks,
+  } = useChecker();
+  const theme = useMantineTheme();
   const categories = useDeferredValue(rawCategories);
   const t = useTranslations('Checker');
-
   const allResults = categories.flatMap((c) => c.results);
   const all = buildDonutData(allResults);
+  const progress = totalCount > 0 ? (checkedCount / totalCount) * 100 : 0;
+  const isDone = all.started && !isChecking;
   return (
     <Stack>
-      <Button onClick={runChecks} loading={isChecking} disabled={isChecking} fullWidth autoFocus>
-        {t('runCheck')}
+      <Button
+        onClick={runChecks}
+        fullWidth
+        className={classes.button}
+        color={isDone ? 'green' : undefined}
+      >
+        {isChecking ? `${checkedCount} / ${totalCount}` : t('runCheck')}
+        {isChecking && (
+          <Progress
+            value={progress}
+            className={classes.progress}
+            radius='sm'
+            color={rgba(theme.colors.blue[2], 0.25)}
+          />
+        )}
       </Button>
 
       {(isChecking || all.started) && (

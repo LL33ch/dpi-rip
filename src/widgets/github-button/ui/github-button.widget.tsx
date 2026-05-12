@@ -9,7 +9,7 @@ export function GithubButton() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    fetch('https://api.github.com/repos/LL33ch/dpi-checker')
+    fetch('https://api.github.com/repos/LL33ch/dpi-rip')
       .then((r) => r.json())
       .then((json) => {
         const count = json.stargazers_count;
@@ -29,7 +29,7 @@ export function GithubButton() {
       loading={isLoading}
       leftSection={<GithubLogoIcon weight='fill' />}
       rightSection={stars ? stars : '00'}
-      href='https://github.com/LL33ch/dpi-checker'
+      href='https://github.com/LL33ch/dpi-rip'
       target='_blank'
     >
       Github
